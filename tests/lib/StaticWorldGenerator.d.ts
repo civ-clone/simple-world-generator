@@ -5,7 +5,7 @@ import { TerrainFeatureRegistry } from '@civ-clone/core-terrain-feature/TerrainF
 export declare class StaticWorldGenerator extends Generator {
   #private;
   constructor(terrainFeatureRegistry?: TerrainFeatureRegistry);
-  generate(): Terrain[];
+  generate(): Promise<Terrain[]>;
   getTerrainWithFeature(
     TerrainType: typeof Terrain,
     ...features: typeof TerrainFeature[]

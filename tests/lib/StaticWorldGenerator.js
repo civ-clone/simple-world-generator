@@ -52,7 +52,9 @@ class StaticWorldGenerator extends Generator_1.default {
             [Terrains_1.Tundra],
             [Terrains_1.Tundra, TerrainFeatures_1.Game],
         ];
-        return terrains.map(([TerrainType, ...features]) => this.getTerrainWithFeature(TerrainType, ...features));
+        return new Promise((resolve) => {
+            resolve(terrains.map(([TerrainType, ...features]) => this.getTerrainWithFeature(TerrainType, ...features)));
+        });
     }
     getTerrainWithFeature(TerrainType, ...features) {
         const terrain = new TerrainType();

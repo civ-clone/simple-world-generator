@@ -30,9 +30,11 @@ class Loader extends Generator_1.default {
         __classPrivateFieldSet(this, _terrainFeatureRegistry, terrainFeatureRegistry);
     }
     generate() {
-        return __classPrivateFieldGet(this, _data).map(([terrain, ...features]) => {
-            __classPrivateFieldGet(this, _terrainFeatureRegistry).register(...features);
-            return terrain;
+        return new Promise((resolve) => {
+            resolve(__classPrivateFieldGet(this, _data).map(([terrain, ...features]) => {
+                __classPrivateFieldGet(this, _terrainFeatureRegistry).register(...features);
+                return terrain;
+            }));
         });
     }
 }

@@ -26,14 +26,18 @@ export class Loader extends Generator {
     this.#terrainFeatureRegistry = terrainFeatureRegistry;
   }
 
-  generate(): Terrain[] {
-    return this.#data.map(
-      ([terrain, ...features]: [Terrain, ...TerrainFeature[]]): Terrain => {
-        this.#terrainFeatureRegistry.register(...features);
+  generate(): Promise<Terrain[]> {
+    return new Promise<Terrain[]>((resolve): void => {
+      resolve(
+        this.#data.map(
+          ([terrain, ...features]: [Terrain, ...TerrainFeature[]]): Terrain => {
+            this.#terrainFeatureRegistry.register(...features);
 
-        return terrain;
-      }
-    );
+            return terrain;
+          }
+        )
+      );
+    });
   }
 }
 

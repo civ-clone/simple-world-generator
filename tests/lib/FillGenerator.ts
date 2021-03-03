@@ -19,10 +19,14 @@ export class FillGenerator extends Generator {
     this.#Terrain = TerrainType;
   }
 
-  generate(): Terrain[] {
-    return new Array(this.#height * this.#width)
-      .fill(0)
-      .map((): Terrain => new this.#Terrain());
+  generate(): Promise<Terrain[]> {
+    return new Promise<Terrain[]>((resolve): void => {
+      resolve(
+        new Array(this.#height * this.#width)
+          .fill(0)
+          .map((): Terrain => new this.#Terrain())
+      );
+    });
   }
 }
 

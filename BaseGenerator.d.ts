@@ -1,37 +1,30 @@
-import Terrain from '@civ-clone/core-terrain/Terrain';
 import {
   Generator,
   IGenerator,
 } from '@civ-clone/core-world-generator/Generator';
 import { RuleRegistry } from '@civ-clone/core-rule/RuleRegistry';
+import { TerrainRegistry } from '@civ-clone/core-terrain/TerrainRegistry';
+import Terrain from '@civ-clone/core-terrain/Terrain';
+export declare type IOptions = {
+  landCoverage?: number;
+  landSize?: number;
+  maxIterations?: number;
+  clusterChance?: number;
+  coverage?: number;
+  pathChance?: number;
+};
 export declare class BaseGenerator extends Generator implements IGenerator {
   #private;
-  constructor({
-    coverage,
-    chanceToBecomeLand,
-    clusterChance,
-    height,
-    landCoverage,
-    landMassReductionScale,
-    maxIterations,
-    pathChance,
-    rulesRegistry,
-    width,
-  }?: {
-    coverage?: number;
-    chanceToBecomeLand?: number;
-    clusterChance?: number;
-    height?: number;
-    landCoverage?: number;
-    landMassReductionScale?: number;
-    maxIterations?: number;
-    pathChance?: number;
-    rulesRegistry?: RuleRegistry;
-    width?: number;
-  });
-  generateLand(): Terrain[];
-  generate(): Terrain[];
+  constructor(
+    height?: number,
+    width?: number,
+    options?: IOptions,
+    ruleRegistry?: RuleRegistry,
+    terrainRegistry?: TerrainRegistry
+  );
+  generateIslands(): Promise<void>;
+  generate(): Promise<Terrain[]>;
   getNeighbours(index: number, directNeighbours?: boolean): number[];
-  populateTerrain(): void;
+  populateTerrain(): Promise<void>;
 }
 export default BaseGenerator;

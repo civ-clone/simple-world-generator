@@ -1,13 +1,23 @@
+import {
+  Distribution,
+  IDistribution,
+} from '@civ-clone/core-world-generator/Rules/Distribution';
+import { Grassland, Ocean, Plains } from '@civ-clone/civ1-world/Terrains';
+import { Land, Water } from '@civ-clone/core-terrain/Types';
+import Criterion from '@civ-clone/core-rule/Criterion';
+import { DistributionGroups } from '@civ-clone/core-world-generator/Rules/DistributionGroups';
+import Effect from '@civ-clone/core-rule/Effect';
 import Generator from '../BaseGenerator';
+import { RuleRegistry } from '@civ-clone/core-rule/RuleRegistry';
+import Terrain from '@civ-clone/core-terrain/Terrain';
 import { expect } from 'chai';
+import { TerrainRegistry } from '@civ-clone/core-terrain/TerrainRegistry';
 
 describe('BaseGenerator', () => {
   const height = 10,
     width = 10,
-    generator = new Generator({
-      height,
-      width,
-    });
+    generator = new Generator(height, width);
+
   generator.generate();
 
   it('should return the expected dimensions', () => {

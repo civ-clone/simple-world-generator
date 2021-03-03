@@ -43,7 +43,7 @@ export class StaticWorldGenerator extends Generator {
     this.#terrainFeatureRegistry = terrainFeatureRegistry;
   }
 
-  generate(): Terrain[] {
+  generate(): Promise<Terrain[]> {
     const terrains: [typeof Terrain, ...typeof TerrainFeature[]][] = [
       [Arctic],
       [Arctic, Seal],
@@ -71,12 +71,16 @@ export class StaticWorldGenerator extends Generator {
       [Tundra, Game],
     ];
 
-    return terrains.map(
-      ([TerrainType, ...features]: [
-        typeof Terrain,
-        ...typeof TerrainFeature[]
-      ]): Terrain => this.getTerrainWithFeature(TerrainType, ...features)
-    );
+    return new Promise((resolve): void => {
+      resolve(
+        terrains.map(
+          ([TerrainType, ...features]: [
+            typeof Terrain,
+            ...typeof TerrainFeature[]
+          ]): Terrain => this.getTerrainWithFeature(TerrainType, ...features)
+        )
+      );
+    });
   }
 
   getTerrainWithFeature(

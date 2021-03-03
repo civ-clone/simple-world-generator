@@ -10,6 +10,6 @@ export declare class Loader extends Generator {
     data: [Terrain, ...TerrainFeature[]][],
     terrainFeatureRegistry?: TerrainFeatureRegistry
   );
-  generate(): Terrain[];
+  generate(): Promise<Terrain[]>;
 }
 export default Loader;

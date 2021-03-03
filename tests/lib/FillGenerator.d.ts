@@ -3,6 +3,6 @@ import Terrain from '@civ-clone/core-terrain/Terrain';
 export declare class FillGenerator extends Generator {
   #private;
   constructor(height: number, width: number, TerrainType?: typeof Terrain);
-  generate(): Terrain[];
+  generate(): Promise<Terrain[]>;
 }
 export default FillGenerator;

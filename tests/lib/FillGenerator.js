@@ -28,9 +28,11 @@ class FillGenerator extends Generator_1.default {
         __classPrivateFieldSet(this, _Terrain, TerrainType);
     }
     generate() {
-        return new Array(__classPrivateFieldGet(this, _height) * __classPrivateFieldGet(this, _width))
-            .fill(0)
-            .map(() => new (__classPrivateFieldGet(this, _Terrain))());
+        return new Promise((resolve) => {
+            resolve(new Array(__classPrivateFieldGet(this, _height) * __classPrivateFieldGet(this, _width))
+                .fill(0)
+                .map(() => new (__classPrivateFieldGet(this, _Terrain))()));
+        });
     }
 }
 exports.FillGenerator = FillGenerator;
