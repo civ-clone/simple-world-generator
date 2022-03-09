@@ -56,9 +56,9 @@ export class BaseGenerator extends Generator implements IGenerator {
     const {
       landCoverage = 0.4, // % of surface covered with land
       landSize = 0.2, // average "size" of landmass
-      maxIterations = 20, // number of times a tile can be tested to change to land
+      maxIterations = 10, // number of times a tile can be tested to change to land
       clusterChance = 0.05, // chance for adjacent tiles to cluster
-      coverage = 0.1, // default total coverage of terrain type
+      coverage = 0.25, // default total coverage of terrain type
       pathChance = 0.05, // default chance for directly adjacent tiles to be part of the path
     } = options;
 
@@ -264,13 +264,12 @@ export class BaseGenerator extends Generator implements IGenerator {
                       max--;
 
                       if (cluster) {
-                        const clusteredNeighbours: number[] = this.getNeighbours(
-                          currentIndex
-                        ).filter(
-                          (index: number): boolean =>
-                            !(this.#map[index] instanceof TerrainType)
-                        );
-                        while (clusteredNeighbours.length) {
+                        const clusteredNeighbours: number[] =
+                          this.getNeighbours(currentIndex).filter(
+                            (index: number): boolean =>
+                              !(this.#map[index] instanceof TerrainType)
+                          );
+                        while (clusteredNeighbours.length && max > 0) {
                           const index = clusteredNeighbours.shift() as number;
 
                           if (

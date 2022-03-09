@@ -6,12 +6,13 @@ const {
   height,
   width,
 
-  islandSize,
+  islandSize: maxIslandPercentage,
   landCoverage,
   maxIterations,
 } = workerData;
 
-const map: number[] = new Array(height * width).fill(0);
+const maxIslandSize = Math.ceil(((height * width) / 100) * maxIslandPercentage),
+  map: number[] = new Array(height * width).fill(0);
 
 while (
   map.length === 0 ||
@@ -19,6 +20,7 @@ while (
     landCoverage
 ) {
   const seen: { [key: number]: number } = {},
+    currentIsland: number[] = [],
     toProcess: number[] = [],
     seedTile: number = Math.floor(height * width * Math.random()),
     flagAsSeen: (id: number) => void = (id: number): void => {
@@ -30,24 +32,28 @@ while (
     };
 
   map[seedTile] = 1;
+  currentIsland.push(seedTile);
 
   flagAsSeen(seedTile);
 
   toProcess.push(...getNeighbours(height, width, seedTile));
 
   while (toProcess.length) {
-    const currentTile = toProcess.shift() as number,
-      distance = distanceFrom(height, width, seedTile, currentTile),
-      surroundingLand = getNeighbours(height, width, currentTile, false).filter(
-        (n: number): boolean => map[n] === 1
-      );
+    const currentTile = toProcess.shift() as number;
+    // ,
+    //   distance = distanceFrom(height, width, seedTile, currentTile),
+    //   surroundingLand = getNeighbours(height, width, currentTile, false).filter(
+    //     (n: number): boolean => map[n] === 1
+    //   );
 
     if ((seen[currentTile] || 0) <= maxIterations) {
       if (
-        islandSize >= Math.sqrt(distance) * Math.random() ||
-        surroundingLand.length * Math.random() > 3
+        Math.random() > 0.3
+        // maxIslandPercentage >= Math.sqrt(distance) * Math.random() ||
+        // surroundingLand.length * Math.random() > 3
       ) {
         map[currentTile] = 1;
+        currentIsland.push(currentTile);
 
         getNeighbours(height, width, currentTile)
           .filter((tile) => toProcess.indexOf(tile) === -1)
@@ -66,8 +72,9 @@ while (
     }
 
     if (
+      currentIsland.length > maxIslandSize ||
       map.filter((value: number): boolean => value === 1).length / map.length >=
-      landCoverage
+        landCoverage
     ) {
       break;
     }

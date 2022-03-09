@@ -45,63 +45,60 @@ type StringTerrain =
   | 'T';
 type StringFeature = 'c' | 'f' | 'a' | 'e' | 'g' | 'h' | 'i' | 'o' | 's' | 'd';
 
-export const simpleRLELoader = (ruleRegistry: RuleRegistry) => (
-  map: string,
-  height: number,
-  width: number
-): World => {
-  const terrainLookup = {
-      A: Arctic,
-      D: Desert,
-      F: Forest,
-      G: Grassland,
-      H: Hills,
-      J: Jungle,
-      M: Mountains,
-      O: Ocean,
-      P: Plains,
-      R: River,
-      S: Swamp,
-      T: Tundra,
-    } as { [key in StringTerrain]: typeof Terrain },
-    featureLookup = {
-      c: Coal,
-      f: Fish,
-      a: Game,
-      e: Gems,
-      g: Gold,
-      h: Horse,
-      i: Oasis,
-      o: Oil,
-      s: Seal,
-      d: Shield,
-    } as { [key in StringFeature]: typeof TerrainFeature },
-    data = (
-      map.replace(/\s+/g, '').match(/(\d+|)([A-Z])([a-z]+|)/g) || []
-    ).flatMap((definition: string): [Terrain, ...TerrainFeature[]][] => {
-      const [, n, terrainIndex, featureIndices] = definition.match(
-        /(\d+|)([A-Z])([a-z]+|)?/
-      ) as [never, string, StringTerrain, StringFeature[]];
+export const simpleRLELoader =
+  (ruleRegistry: RuleRegistry) =>
+  (map: string, height: number, width: number): World => {
+    const terrainLookup = {
+        A: Arctic,
+        D: Desert,
+        F: Forest,
+        G: Grassland,
+        H: Hills,
+        J: Jungle,
+        M: Mountains,
+        O: Ocean,
+        P: Plains,
+        R: River,
+        S: Swamp,
+        T: Tundra,
+      } as { [key in StringTerrain]: typeof Terrain },
+      featureLookup = {
+        c: Coal,
+        f: Fish,
+        a: Game,
+        e: Gems,
+        g: Gold,
+        h: Horse,
+        i: Oasis,
+        o: Oil,
+        s: Seal,
+        d: Shield,
+      } as { [key in StringFeature]: typeof TerrainFeature },
+      data = (
+        map.replace(/\s+/g, '').match(/(\d+|)([A-Z])([a-z]+|)/g) || []
+      ).flatMap((definition: string): [Terrain, ...TerrainFeature[]][] => {
+        const [, n, terrainIndex, featureIndices] = definition.match(
+          /(\d+|)([A-Z])([a-z]+|)?/
+        ) as [never, string, StringTerrain, StringFeature[]];
 
-      return new Array(parseInt(n) || 1).fill(0).map((): [
-        Terrain,
-        ...TerrainFeature[]
-      ] => {
-        const terrain = new terrainLookup[terrainIndex](),
-          features =
-            [...(featureIndices || [])].map(
-              (featureIndex: StringFeature): TerrainFeature =>
-                new featureLookup[featureIndex](terrain)
-            ) || [];
+        return new Array(parseInt(n) || 1)
+          .fill(0)
+          .map((): [Terrain, ...TerrainFeature[]] => {
+            const terrain = new terrainLookup[terrainIndex](),
+              features =
+                [...(featureIndices || [])].map(
+                  (featureIndex: StringFeature): TerrainFeature =>
+                    new featureLookup[featureIndex](terrain)
+                ) || [];
 
-        return [terrain, ...features];
-      });
-    }),
-    world = new World(new Loader(height, width, data));
+            return [terrain, ...features];
+          });
+      }),
+      world = new World(new Loader(height, width, data));
 
-  world.build(ruleRegistry);
+    world.build(ruleRegistry);
 
-  return world;
-};
+    return world;
+  };
 
 export default simpleRLELoader;

@@ -32,7 +32,9 @@ const simpleRLELoader = (ruleRegistry) => (map, height, width) => {
         d: TerrainFeatures_1.Shield,
     }, data = (map.replace(/\s+/g, '').match(/(\d+|)([A-Z])([a-z]+|)/g) || []).flatMap((definition) => {
         const [, n, terrainIndex, featureIndices] = definition.match(/(\d+|)([A-Z])([a-z]+|)?/);
-        return new Array(parseInt(n) || 1).fill(0).map(() => {
+        return new Array(parseInt(n) || 1)
+            .fill(0)
+            .map(() => {
             const terrain = new terrainLookup[terrainIndex](), features = [...(featureIndices || [])].map((featureIndex) => new featureLookup[featureIndex](terrain)) || [];
             return [terrain, ...features];
         });

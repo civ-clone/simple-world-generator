@@ -1,18 +1,16 @@
 "use strict";
-var __classPrivateFieldSet = (this && this.__classPrivateFieldSet) || function (receiver, privateMap, value) {
-    if (!privateMap.has(receiver)) {
-        throw new TypeError("attempted to set private field on non-instance");
-    }
-    privateMap.set(receiver, value);
-    return value;
+var __classPrivateFieldSet = (this && this.__classPrivateFieldSet) || function (receiver, state, value, kind, f) {
+    if (kind === "m") throw new TypeError("Private method is not writable");
+    if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a setter");
+    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot write private member to an object whose class did not declare it");
+    return (kind === "a" ? f.call(receiver, value) : f ? f.value = value : state.set(receiver, value)), value;
 };
-var __classPrivateFieldGet = (this && this.__classPrivateFieldGet) || function (receiver, privateMap) {
-    if (!privateMap.has(receiver)) {
-        throw new TypeError("attempted to get private field on non-instance");
-    }
-    return privateMap.get(receiver);
+var __classPrivateFieldGet = (this && this.__classPrivateFieldGet) || function (receiver, state, kind, f) {
+    if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a getter");
+    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
+    return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
 };
-var _landCoverage, _landSize, _maxIterations, _clusterChance, _coverage, _pathChance, _map, _ruleRegistry, _terrainRegistry;
+var _BaseGenerator_landCoverage, _BaseGenerator_landSize, _BaseGenerator_maxIterations, _BaseGenerator_clusterChance, _BaseGenerator_coverage, _BaseGenerator_pathChance, _BaseGenerator_map, _BaseGenerator_ruleRegistry, _BaseGenerator_terrainRegistry;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.BaseGenerator = void 0;
 const Distribution_1 = require("@civ-clone/core-world-generator/Rules/Distribution");
@@ -26,39 +24,33 @@ const getNeighbours_1 = require("@civ-clone/core-world-generator/lib/getNeighbou
 class BaseGenerator extends Generator_1.Generator {
     constructor(height = 100, width = 160, options = {}, ruleRegistry = RuleRegistry_1.instance, terrainRegistry = TerrainRegistry_1.instance) {
         super(height, width);
-        _landCoverage.set(this, void 0); // % of surface covered with land
-        _landSize.set(this, void 0); // average "size" of landmass
-        _maxIterations.set(this, void 0); // number of times a tile can be tested to change to land
-        _clusterChance.set(this, void 0); // chance for adjacent tiles to cluster
-        _coverage.set(this, void 0); // default total coverage of terrain type
-        _pathChance.set(this, void 0); // default chance for directly adjacent tiles to be part of the path
-        _map.set(this, void 0);
-        _ruleRegistry.set(this, void 0);
-        _terrainRegistry.set(this, void 0);
+        _BaseGenerator_landCoverage.set(this, void 0); // % of surface covered with land
+        _BaseGenerator_landSize.set(this, void 0); // average "size" of landmass
+        _BaseGenerator_maxIterations.set(this, void 0); // number of times a tile can be tested to change to land
+        _BaseGenerator_clusterChance.set(this, void 0); // chance for adjacent tiles to cluster
+        _BaseGenerator_coverage.set(this, void 0); // default total coverage of terrain type
+        _BaseGenerator_pathChance.set(this, void 0); // default chance for directly adjacent tiles to be part of the path
+        _BaseGenerator_map.set(this, void 0);
+        _BaseGenerator_ruleRegistry.set(this, void 0);
+        _BaseGenerator_terrainRegistry.set(this, void 0);
         const { landCoverage = 0.4, // % of surface covered with land
         landSize = 0.2, // average "size" of landmass
-        maxIterations = 20, // number of times a tile can be tested to change to land
+        maxIterations = 10, // number of times a tile can be tested to change to land
         clusterChance = 0.05, // chance for adjacent tiles to cluster
-        coverage = 0.1, // default total coverage of terrain type
+        coverage = 0.25, // default total coverage of terrain type
         pathChance = 0.05, // default chance for directly adjacent tiles to be part of the path
          } = options;
-        __classPrivateFieldSet(this, _landCoverage, landCoverage); // % of surface covered with land
-        __classPrivateFieldSet(// % of surface covered with land
-        this, _landSize, landSize); // average "size" of landmass
-        __classPrivateFieldSet(// average "size" of landmass
-        this, _maxIterations, maxIterations); // number of times a tile can be tested to change to land
-        __classPrivateFieldSet(// number of times a tile can be tested to change to land
-        this, _clusterChance, clusterChance); // chance for adjacent tiles to cluster
-        __classPrivateFieldSet(// chance for adjacent tiles to cluster
-        this, _coverage, coverage); // default total coverage of terrain type
-        __classPrivateFieldSet(// default total coverage of terrain type
-        this, _pathChance, pathChance); // default chance for directly adjacent tiles to be part of the path
-        __classPrivateFieldSet(// default chance for directly adjacent tiles to be part of the path
-        this, _ruleRegistry, ruleRegistry);
-        __classPrivateFieldSet(this, _terrainRegistry, terrainRegistry);
-        __classPrivateFieldSet(this, _map, new Array(this.height() * this.width())
+        __classPrivateFieldSet(this, _BaseGenerator_landCoverage, landCoverage, "f"); // % of surface covered with land
+        __classPrivateFieldSet(this, _BaseGenerator_landSize, landSize, "f"); // average "size" of landmass
+        __classPrivateFieldSet(this, _BaseGenerator_maxIterations, maxIterations, "f"); // number of times a tile can be tested to change to land
+        __classPrivateFieldSet(this, _BaseGenerator_clusterChance, clusterChance, "f"); // chance for adjacent tiles to cluster
+        __classPrivateFieldSet(this, _BaseGenerator_coverage, coverage, "f"); // default total coverage of terrain type
+        __classPrivateFieldSet(this, _BaseGenerator_pathChance, pathChance, "f"); // default chance for directly adjacent tiles to be part of the path
+        __classPrivateFieldSet(this, _BaseGenerator_ruleRegistry, ruleRegistry, "f");
+        __classPrivateFieldSet(this, _BaseGenerator_terrainRegistry, terrainRegistry, "f");
+        __classPrivateFieldSet(this, _BaseGenerator_map, new Array(this.height() * this.width())
             .fill(0)
-            .map(() => new Types_1.Water()));
+            .map(() => new Types_1.Water()), "f");
     }
     generateIslands() {
         return new Promise((resolve, reject) => {
@@ -66,20 +58,20 @@ class BaseGenerator extends Generator_1.Generator {
                 workerData: {
                     height: this.height(),
                     width: this.width(),
-                    islandSize: __classPrivateFieldGet(this, _landSize) + Math.random() * 0.2,
-                    landCoverage: __classPrivateFieldGet(this, _landCoverage),
-                    maxIterations: __classPrivateFieldGet(this, _maxIterations),
+                    islandSize: __classPrivateFieldGet(this, _BaseGenerator_landSize, "f") + Math.random() * 0.2,
+                    landCoverage: __classPrivateFieldGet(this, _BaseGenerator_landCoverage, "f"),
+                    maxIterations: __classPrivateFieldGet(this, _BaseGenerator_maxIterations, "f"),
                 },
             });
             worker.on('error', (error) => reject(error));
             worker.on('messageerror', (error) => reject(error));
             worker.on('message', (mapData) => {
-                __classPrivateFieldSet(this, _map, mapData.map((value) => {
+                __classPrivateFieldSet(this, _BaseGenerator_map, mapData.map((value) => {
                     if (value === 1) {
                         return new Types_1.Land();
                     }
                     return new Types_1.Water();
-                }));
+                }), "f");
                 resolve();
             });
             // while (
@@ -154,15 +146,15 @@ class BaseGenerator extends Generator_1.Generator {
         });
     }
     generate() {
-        return this.generateIslands().then(() => this.populateTerrain().then(() => __classPrivateFieldGet(this, _map)));
+        return this.generateIslands().then(() => this.populateTerrain().then(() => __classPrivateFieldGet(this, _BaseGenerator_map, "f")));
     }
     getNeighbours(index, directNeighbours = true) {
-        return getNeighbours_1.default(this.height(), this.width(), index, directNeighbours);
+        return (0, getNeighbours_1.default)(this.height(), this.width(), index, directNeighbours);
     }
     populateTerrain() {
         return new Promise((resolve) => {
-            const rules = __classPrivateFieldGet(this, _ruleRegistry).get(Distribution_1.Distribution);
-            __classPrivateFieldGet(this, _ruleRegistry)
+            const rules = __classPrivateFieldGet(this, _BaseGenerator_ruleRegistry, "f").get(Distribution_1.Distribution);
+            __classPrivateFieldGet(this, _BaseGenerator_ruleRegistry, "f")
                 .get(DistributionGroups_1.DistributionGroups)
                 .filter((rule) => rule.validate())
                 .map((rule) => {
@@ -173,45 +165,45 @@ class BaseGenerator extends Generator_1.Generator {
                 return result;
             })
                 .forEach((group) => group.forEach((TerrainType) => rules
-                .filter((rule) => rule.validate(TerrainType, __classPrivateFieldGet(this, _map)))
+                .filter((rule) => rule.validate(TerrainType, __classPrivateFieldGet(this, _BaseGenerator_map, "f")))
                 .map((rule) => {
-                const result = rule.process(TerrainType, __classPrivateFieldGet(this, _map));
+                const result = rule.process(TerrainType, __classPrivateFieldGet(this, _BaseGenerator_map, "f"));
                 if (!result) {
                     throw new TypeError('Unexpected data from Distribution.');
                 }
                 return result;
             })
-                .forEach((distribution) => distribution.forEach(({ cluster = false, clusterChance = __classPrivateFieldGet(this, _clusterChance), coverage = __classPrivateFieldGet(this, _coverage), fill = false, from = 0, path = false, pathChance = __classPrivateFieldGet(this, _pathChance), to = 1, }) => {
-                const validIndices = Object.keys(__classPrivateFieldGet(this, _map))
+                .forEach((distribution) => distribution.forEach(({ cluster = false, clusterChance = __classPrivateFieldGet(this, _BaseGenerator_clusterChance, "f"), coverage = __classPrivateFieldGet(this, _BaseGenerator_coverage, "f"), fill = false, from = 0, path = false, pathChance = __classPrivateFieldGet(this, _BaseGenerator_pathChance, "f"), to = 1, }) => {
+                const validIndices = Object.keys(__classPrivateFieldGet(this, _BaseGenerator_map, "f"))
                     .map((index) => parseInt(index, 10))
                     .filter((index) => 
                 // @ts-ignore
-                __classPrivateFieldGet(this, _map)[index] instanceof TerrainType.__proto__)
+                __classPrivateFieldGet(this, _BaseGenerator_map, "f")[index] instanceof TerrainType.__proto__)
                     .filter((index) => index >= from * this.height() * this.width() &&
                     index <= to * this.height() * this.width());
                 if (fill) {
                     validIndices.forEach((index) => {
-                        __classPrivateFieldGet(this, _map)[index] = new TerrainType();
+                        __classPrivateFieldGet(this, _BaseGenerator_map, "f")[index] = new TerrainType();
                     });
                     return;
                 }
                 let max = validIndices.length * coverage;
                 while (max > 0) {
                     const currentIndex = validIndices[Math.floor(Math.random() * validIndices.length)];
-                    __classPrivateFieldGet(this, _map)[currentIndex] = new TerrainType();
+                    __classPrivateFieldGet(this, _BaseGenerator_map, "f")[currentIndex] = new TerrainType();
                     max--;
                     if (cluster) {
-                        const clusteredNeighbours = this.getNeighbours(currentIndex).filter((index) => !(__classPrivateFieldGet(this, _map)[index] instanceof TerrainType));
-                        while (clusteredNeighbours.length) {
+                        const clusteredNeighbours = this.getNeighbours(currentIndex).filter((index) => !(__classPrivateFieldGet(this, _BaseGenerator_map, "f")[index] instanceof TerrainType));
+                        while (clusteredNeighbours.length && max > 0) {
                             const index = clusteredNeighbours.shift();
                             if (clusterChance >=
                                 Math.random() /
                                     this.distanceFrom(currentIndex, index)) {
-                                __classPrivateFieldGet(this, _map)[index] = new TerrainType();
+                                __classPrivateFieldGet(this, _BaseGenerator_map, "f")[index] = new TerrainType();
                                 max--;
                                 clusteredNeighbours.push(...this.getNeighbours(index)
-                                    .filter((index) => !(__classPrivateFieldGet(this, _map)[index] instanceof TerrainType))
-                                    .filter((index) => __classPrivateFieldGet(this, _map)[index] instanceof
+                                    .filter((index) => !(__classPrivateFieldGet(this, _BaseGenerator_map, "f")[index] instanceof TerrainType))
+                                    .filter((index) => __classPrivateFieldGet(this, _BaseGenerator_map, "f")[index] instanceof
                                     // @ts-ignore
                                     TerrainType.__proto__)
                                     .filter((index) => !clusteredNeighbours.includes(index)));
@@ -221,13 +213,13 @@ class BaseGenerator extends Generator_1.Generator {
                     if (path) {
                         let index = currentIndex;
                         while (pathChance >= Math.random()) {
-                            const candidates = this.getNeighbours(index).filter((index) => __classPrivateFieldGet(this, _map)[index] instanceof
+                            const candidates = this.getNeighbours(index).filter((index) => __classPrivateFieldGet(this, _BaseGenerator_map, "f")[index] instanceof
                                 // @ts-ignore
                                 TerrainType.__proto__ &&
-                                !(__classPrivateFieldGet(this, _map)[index] instanceof TerrainType));
+                                !(__classPrivateFieldGet(this, _BaseGenerator_map, "f")[index] instanceof TerrainType));
                             index =
                                 candidates[Math.floor(Math.random() * candidates.length)];
-                            __classPrivateFieldGet(this, _map)[index] = new TerrainType();
+                            __classPrivateFieldGet(this, _BaseGenerator_map, "f")[index] = new TerrainType();
                             max--;
                         }
                     }
@@ -238,6 +230,6 @@ class BaseGenerator extends Generator_1.Generator {
     }
 }
 exports.BaseGenerator = BaseGenerator;
-_landCoverage = new WeakMap(), _landSize = new WeakMap(), _maxIterations = new WeakMap(), _clusterChance = new WeakMap(), _coverage = new WeakMap(), _pathChance = new WeakMap(), _map = new WeakMap(), _ruleRegistry = new WeakMap(), _terrainRegistry = new WeakMap();
+_BaseGenerator_landCoverage = new WeakMap(), _BaseGenerator_landSize = new WeakMap(), _BaseGenerator_maxIterations = new WeakMap(), _BaseGenerator_clusterChance = new WeakMap(), _BaseGenerator_coverage = new WeakMap(), _BaseGenerator_pathChance = new WeakMap(), _BaseGenerator_map = new WeakMap(), _BaseGenerator_ruleRegistry = new WeakMap(), _BaseGenerator_terrainRegistry = new WeakMap();
 exports.default = BaseGenerator;
 //# sourceMappingURL=BaseGenerator.js.map
