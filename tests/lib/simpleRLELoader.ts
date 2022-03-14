@@ -47,7 +47,7 @@ type StringFeature = 'c' | 'f' | 'a' | 'e' | 'g' | 'h' | 'i' | 'o' | 's' | 'd';
 
 export const simpleRLELoader =
   (ruleRegistry: RuleRegistry) =>
-  (map: string, height: number, width: number): World => {
+  async (map: string, height: number, width: number): Promise<World> => {
     const terrainLookup = {
         A: Arctic,
         D: Desert,
@@ -96,7 +96,7 @@ export const simpleRLELoader =
       }),
       world = new World(new Loader(height, width, data));
 
-    world.build(ruleRegistry);
+    await world.build(ruleRegistry);
 
     return world;
   };

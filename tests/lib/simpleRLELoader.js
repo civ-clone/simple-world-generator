@@ -5,7 +5,7 @@ const Terrains_1 = require("@civ-clone/civ1-world/Terrains");
 const TerrainFeatures_1 = require("@civ-clone/civ1-world/TerrainFeatures");
 const Loader_1 = require("./Loader");
 const World_1 = require("@civ-clone/core-world/World");
-const simpleRLELoader = (ruleRegistry) => (map, height, width) => {
+const simpleRLELoader = (ruleRegistry) => async (map, height, width) => {
     const terrainLookup = {
         A: Terrains_1.Arctic,
         D: Terrains_1.Desert,
@@ -39,7 +39,7 @@ const simpleRLELoader = (ruleRegistry) => (map, height, width) => {
             return [terrain, ...features];
         });
     }), world = new World_1.default(new Loader_1.default(height, width, data));
-    world.build(ruleRegistry);
+    await world.build(ruleRegistry);
     return world;
 };
 exports.simpleRLELoader = simpleRLELoader;
