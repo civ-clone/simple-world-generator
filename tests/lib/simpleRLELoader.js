@@ -3,9 +3,11 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.simpleRLELoader = void 0;
 const Terrains_1 = require("@civ-clone/civ1-world/Terrains");
 const TerrainFeatures_1 = require("@civ-clone/civ1-world/TerrainFeatures");
+const RuleRegistry_1 = require("@civ-clone/core-rule/RuleRegistry");
+const TerrainFeatureRegistry_1 = require("@civ-clone/core-terrain-feature/TerrainFeatureRegistry");
 const Loader_1 = require("./Loader");
 const World_1 = require("@civ-clone/core-world/World");
-const simpleRLELoader = (ruleRegistry) => async (map, height, width) => {
+const simpleRLELoader = (ruleRegistry = RuleRegistry_1.instance, terrainFeatureRegistry = TerrainFeatureRegistry_1.instance) => async (map, height, width) => {
     const terrainLookup = {
         A: Terrains_1.Arctic,
         D: Terrains_1.Desert,
@@ -38,8 +40,8 @@ const simpleRLELoader = (ruleRegistry) => async (map, height, width) => {
             const terrain = new terrainLookup[terrainIndex](), features = [...(featureIndices || [])].map((featureIndex) => new featureLookup[featureIndex](terrain)) || [];
             return [terrain, ...features];
         });
-    }), world = new World_1.default(new Loader_1.default(height, width, data));
-    await world.build(ruleRegistry);
+    }), world = new World_1.default(new Loader_1.default(height, width, data, terrainFeatureRegistry), ruleRegistry);
+    await world.build();
     return world;
 };
 exports.simpleRLELoader = simpleRLELoader;

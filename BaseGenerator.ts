@@ -41,6 +41,7 @@ export class BaseGenerator extends Generator implements IGenerator {
   #coverage: number; // default total coverage of terrain type
   #pathChance: number; // default chance for directly adjacent tiles to be part of the path
   #map: Terrain[];
+  #randomNumberGenerator: () => number;
   #ruleRegistry: RuleRegistry;
   #terrainRegistry: TerrainRegistry;
 
@@ -49,7 +50,8 @@ export class BaseGenerator extends Generator implements IGenerator {
     width: number = 160,
     options: IOptions = {},
     ruleRegistry: RuleRegistry = ruleRegistryInstance,
-    terrainRegistry: TerrainRegistry = terrainRegistryInstance
+    terrainRegistry: TerrainRegistry = terrainRegistryInstance,
+    randomNumberGenerator: () => number = () => Math.random()
   ) {
     super(height, width);
 
@@ -70,6 +72,7 @@ export class BaseGenerator extends Generator implements IGenerator {
     this.#pathChance = pathChance; // default chance for directly adjacent tiles to be part of the path
     this.#ruleRegistry = ruleRegistry;
     this.#terrainRegistry = terrainRegistry;
+    this.#randomNumberGenerator = randomNumberGenerator;
 
     this.#map = new Array(this.height() * this.width())
       .fill(0)
@@ -82,7 +85,7 @@ export class BaseGenerator extends Generator implements IGenerator {
         workerData: {
           height: this.height(),
           width: this.width(),
-          islandSize: this.#landSize + Math.random() * 0.2,
+          islandSize: this.#landSize + this.#randomNumberGenerator() * 0.2,
           landCoverage: this.#landCoverage,
           maxIterations: this.#maxIterations,
         },
@@ -102,76 +105,6 @@ export class BaseGenerator extends Generator implements IGenerator {
 
         resolve();
       });
-
-      // while (
-      //   this.#map.filter((tile: Terrain): boolean => tile instanceof Land)
-      //     .length /
-      //     this.#map.length <
-      //   this.#landCoverage
-      // ) {
-      //
-      //   const islandSize = this.#landSize + Math.random() * 0.2,
-      //     seen: { [key: number]: number } = {},
-      //     toProcess: number[] = [],
-      //     seedTile: number = Math.floor(
-      //       this.height() * this.width() * Math.random()
-      //     ),
-      //     flagAsSeen: (id: number) => void = (id: number): void => {
-      //       if (!(id in seen)) {
-      //         seen[id] = 0;
-      //       }
-      //
-      //       seen[id]++;
-      //     };
-      //
-      //   this.#map[seedTile] = new Land();
-      //
-      //   flagAsSeen(seedTile);
-      //
-      //   toProcess.push(...this.getNeighbours(seedTile));
-      //
-      //   while (toProcess.length) {
-      //     const currentTile = toProcess.shift() as number,
-      //       distance = this.distanceFrom(seedTile, currentTile),
-      //       surroundingLand = this.getNeighbours(currentTile, false).filter(
-      //         (n: number): boolean => this.#map[n] instanceof Land
-      //       );
-      //
-      //     if ((seen[currentTile] || 0) <= this.#maxIterations) {
-      //       if (
-      //         islandSize >= Math.sqrt(distance) * Math.random() ||
-      //         surroundingLand.length * Math.random() > 3
-      //       ) {
-      //         this.#map[currentTile] = new Land();
-      //
-      //         this.getNeighbours(currentTile)
-      //           .filter((tile) => toProcess.indexOf(tile) === -1)
-      //           .forEach((tile) => toProcess.push(tile));
-      //       } else {
-      //         this.getNeighbours(currentTile).forEach((tile) => {
-      //           const index = toProcess.indexOf(tile);
-      //
-      //           if (index > -1) {
-      //             toProcess.splice(index, 1);
-      //           }
-      //         });
-      //       }
-      //
-      //       flagAsSeen(currentTile);
-      //     }
-      //
-      //     if (
-      //       this.#map.filter((tile: Terrain): boolean => tile instanceof Land)
-      //         .length /
-      //         this.#map.length >=
-      //       this.#landCoverage
-      //     ) {
-      //       return resolve();
-      //     }
-      //   }
-      // }
-      //
-      // resolve();
     });
   }
 
@@ -188,11 +121,9 @@ export class BaseGenerator extends Generator implements IGenerator {
 
   populateTerrain(): Promise<void> {
     return new Promise<void>((resolve) => {
-      const rules = (this.#ruleRegistry as IDistributionRegistry).get(
-        Distribution
-      );
+      const rules = this.#ruleRegistry.get(Distribution);
 
-      (this.#ruleRegistry as IDistributionGroupsRegistry)
+      this.#ruleRegistry
         .get(DistributionGroups)
         .filter((rule: DistributionGroups): boolean => rule.validate())
         .map((rule: DistributionGroups): typeof Terrain[] => {
@@ -257,7 +188,9 @@ export class BaseGenerator extends Generator implements IGenerator {
                     while (max > 0) {
                       const currentIndex: number =
                         validIndices[
-                          Math.floor(Math.random() * validIndices.length)
+                          Math.floor(
+                            this.#randomNumberGenerator() * validIndices.length
+                          )
                         ];
 
                       this.#map[currentIndex] = new TerrainType();
@@ -274,7 +207,7 @@ export class BaseGenerator extends Generator implements IGenerator {
 
                           if (
                             clusterChance >=
-                            Math.random() /
+                            this.#randomNumberGenerator() /
                               this.distanceFrom(currentIndex, index)
                           ) {
                             this.#map[index] = new TerrainType();
@@ -304,7 +237,7 @@ export class BaseGenerator extends Generator implements IGenerator {
                       if (path) {
                         let index = currentIndex;
 
-                        while (pathChance >= Math.random()) {
+                        while (pathChance >= this.#randomNumberGenerator()) {
                           const candidates: number[] = this.getNeighbours(
                             index
                           ).filter(
@@ -316,7 +249,10 @@ export class BaseGenerator extends Generator implements IGenerator {
                           );
                           index =
                             candidates[
-                              Math.floor(Math.random() * candidates.length)
+                              Math.floor(
+                                this.#randomNumberGenerator() *
+                                  candidates.length
+                              )
                             ];
 
                           this.#map[index] = new TerrainType();

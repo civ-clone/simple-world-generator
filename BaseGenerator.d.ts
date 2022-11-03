@@ -20,7 +20,8 @@ export declare class BaseGenerator extends Generator implements IGenerator {
     width?: number,
     options?: IOptions,
     ruleRegistry?: RuleRegistry,
-    terrainRegistry?: TerrainRegistry
+    terrainRegistry?: TerrainRegistry,
+    randomNumberGenerator?: () => number
   );
   generateIslands(): Promise<void>;
   generate(): Promise<Terrain[]>;

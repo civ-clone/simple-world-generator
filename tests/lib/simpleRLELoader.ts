@@ -24,8 +24,15 @@ import {
   Seal,
   Shield,
 } from '@civ-clone/civ1-world/TerrainFeatures';
+import {
+  RuleRegistry,
+  instance as ruleRegistryInstance,
+} from '@civ-clone/core-rule/RuleRegistry';
+import {
+  TerrainFeatureRegistry,
+  instance as terrainFeatureRegistryInstance,
+} from '@civ-clone/core-terrain-feature/TerrainFeatureRegistry';
 import Loader from './Loader';
-import RuleRegistry from '@civ-clone/core-rule/RuleRegistry';
 import Terrain from '@civ-clone/core-terrain/Terrain';
 import TerrainFeature from '@civ-clone/core-terrain-feature/TerrainFeature';
 import World from '@civ-clone/core-world/World';
@@ -46,7 +53,10 @@ type StringTerrain =
 type StringFeature = 'c' | 'f' | 'a' | 'e' | 'g' | 'h' | 'i' | 'o' | 's' | 'd';
 
 export const simpleRLELoader =
-  (ruleRegistry: RuleRegistry) =>
+  (
+    ruleRegistry: RuleRegistry = ruleRegistryInstance,
+    terrainFeatureRegistry: TerrainFeatureRegistry = terrainFeatureRegistryInstance
+  ) =>
   async (map: string, height: number, width: number): Promise<World> => {
     const terrainLookup = {
         A: Arctic,
@@ -94,9 +104,12 @@ export const simpleRLELoader =
             return [terrain, ...features];
           });
       }),
-      world = new World(new Loader(height, width, data));
+      world = new World(
+        new Loader(height, width, data, terrainFeatureRegistry),
+        ruleRegistry
+      );
 
-    await world.build(ruleRegistry);
+    await world.build();
 
     return world;
   };
