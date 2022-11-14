@@ -14,12 +14,11 @@ var _BaseGenerator_landCoverage, _BaseGenerator_landSize, _BaseGenerator_maxIter
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.BaseGenerator = void 0;
 const Distribution_1 = require("@civ-clone/core-world-generator/Rules/Distribution");
-const DistributionGroups_1 = require("@civ-clone/core-world-generator/Rules/DistributionGroups");
 const Generator_1 = require("@civ-clone/core-world-generator/Generator");
 const Types_1 = require("@civ-clone/core-terrain/Types");
 const RuleRegistry_1 = require("@civ-clone/core-rule/RuleRegistry");
 const TerrainRegistry_1 = require("@civ-clone/core-terrain/TerrainRegistry");
-const worker_threads_1 = require("worker_threads");
+const DistributionGroups_1 = require("@civ-clone/core-world-generator/Rules/DistributionGroups");
 const getNeighbours_1 = require("@civ-clone/core-world-generator/lib/getNeighbours");
 class BaseGenerator extends Generator_1.Generator {
     constructor(height = 100, width = 160, options = {}, ruleRegistry = RuleRegistry_1.instance, terrainRegistry = TerrainRegistry_1.instance, randomNumberGenerator = () => Math.random()) {
@@ -54,29 +53,68 @@ class BaseGenerator extends Generator_1.Generator {
             .fill(0)
             .map(() => new Types_1.Water()), "f");
     }
-    generateIslands() {
-        return new Promise((resolve, reject) => {
-            const worker = new worker_threads_1.Worker(__dirname + '/generateLand.js', {
-                workerData: {
-                    height: this.height(),
-                    width: this.width(),
-                    islandSize: __classPrivateFieldGet(this, _BaseGenerator_landSize, "f") + __classPrivateFieldGet(this, _BaseGenerator_randomNumberGenerator, "f").call(this) * 0.2,
-                    landCoverage: __classPrivateFieldGet(this, _BaseGenerator_landCoverage, "f"),
-                    maxIterations: __classPrivateFieldGet(this, _BaseGenerator_maxIterations, "f"),
-                },
-            });
-            worker.on('error', (error) => reject(error));
-            worker.on('messageerror', (error) => reject(error));
-            worker.on('message', (mapData) => {
-                __classPrivateFieldSet(this, _BaseGenerator_map, mapData.map((value) => {
-                    if (value === 1) {
-                        return new Types_1.Land();
+    async generateIslands() {
+        const height = this.height(), width = this.width(), maxIslandPercentage = __classPrivateFieldGet(this, _BaseGenerator_landSize, "f") + __classPrivateFieldGet(this, _BaseGenerator_randomNumberGenerator, "f").call(this) * 0.2, landCoverage = __classPrivateFieldGet(this, _BaseGenerator_landCoverage, "f"), maxIterations = __classPrivateFieldGet(this, _BaseGenerator_maxIterations, "f"), maxIslandSize = Math.ceil(((height * width) / 100) * maxIslandPercentage), map = new Array(height * width).fill(0);
+        while (map.length === 0 ||
+            map.filter((value) => value === 1).length / map.length <
+                landCoverage) {
+            const seen = {}, currentIsland = [], toProcess = [], seedTile = Math.floor(height * width * Math.random()), flagAsSeen = (id) => {
+                if (!(id in seen)) {
+                    seen[id] = 0;
+                }
+                seen[id]++;
+            };
+            map[seedTile] = 1;
+            currentIsland.push(seedTile);
+            flagAsSeen(seedTile);
+            toProcess.push(...(0, getNeighbours_1.default)(height, width, seedTile));
+            while (toProcess.length) {
+                const currentTile = toProcess.shift();
+                // ,
+                //   distance = distanceFrom(height, width, seedTile, currentTile),
+                //   surroundingLand = getNeighbours(height, width, currentTile, false).filter(
+                //     (n: number): boolean => map[n] === 1
+                //   );
+                if ((seen[currentTile] || 0) <= maxIterations) {
+                    if (Math.random() > 0.3
+                    // maxIslandPercentage >= Math.sqrt(distance) * Math.random() ||
+                    // surroundingLand.length * Math.random() > 3
+                    ) {
+                        map[currentTile] = 1;
+                        currentIsland.push(currentTile);
+                        (0, getNeighbours_1.default)(height, width, currentTile)
+                            .filter((tile) => toProcess.indexOf(tile) === -1)
+                            .forEach((tile) => toProcess.push(tile));
                     }
-                    return new Types_1.Water();
-                }), "f");
-                resolve();
-            });
-        });
+                    else {
+                        (0, getNeighbours_1.default)(height, width, currentTile).forEach((tile) => {
+                            const index = toProcess.indexOf(tile);
+                            if (index > -1) {
+                                toProcess.splice(index, 1);
+                            }
+                        });
+                    }
+                    flagAsSeen(currentTile);
+                }
+                if (currentIsland.length > maxIslandSize ||
+                    map.filter((value) => value === 1).length /
+                        map.length >=
+                        landCoverage) {
+                    break;
+                }
+            }
+            if (map.filter((value) => value === 1).length /
+                map.length >=
+                landCoverage) {
+                break;
+            }
+        }
+        __classPrivateFieldSet(this, _BaseGenerator_map, map.map((value) => {
+            if (value === 1) {
+                return new Types_1.Land();
+            }
+            return new Types_1.Water();
+        }), "f");
     }
     generate() {
         return this.generateIslands().then(() => this.populateTerrain().then(() => __classPrivateFieldGet(this, _BaseGenerator_map, "f")));
@@ -88,7 +126,7 @@ class BaseGenerator extends Generator_1.Generator {
         return new Promise((resolve) => {
             const rules = __classPrivateFieldGet(this, _BaseGenerator_ruleRegistry, "f").get(Distribution_1.Distribution);
             __classPrivateFieldGet(this, _BaseGenerator_ruleRegistry, "f")
-                .get(DistributionGroups_1.DistributionGroups)
+                .get(DistributionGroups_1.default)
                 .filter((rule) => rule.validate())
                 .map((rule) => {
                 const result = rule.process();

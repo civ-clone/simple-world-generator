@@ -1,12 +1,7 @@
 import {
   Distribution,
   IDistribution,
-  IDistributionRegistry,
 } from '@civ-clone/core-world-generator/Rules/Distribution';
-import {
-  DistributionGroups,
-  IDistributionGroupsRegistry,
-} from '@civ-clone/core-world-generator/Rules/DistributionGroups';
 import {
   Generator,
   IGenerator,
@@ -20,8 +15,8 @@ import {
   TerrainRegistry,
   instance as terrainRegistryInstance,
 } from '@civ-clone/core-terrain/TerrainRegistry';
+import DistributionGroups from '@civ-clone/core-world-generator/Rules/DistributionGroups';
 import Terrain from '@civ-clone/core-terrain/Terrain';
-import { Worker } from 'worker_threads';
 import getNeighbours from '@civ-clone/core-world-generator/lib/getNeighbours';
 
 export type IOptions = {
@@ -79,32 +74,98 @@ export class BaseGenerator extends Generator implements IGenerator {
       .map(() => new Water());
   }
 
-  generateIslands(): Promise<void> {
-    return new Promise<void>((resolve, reject): void => {
-      const worker = new Worker(__dirname + '/generateLand.js', {
-        workerData: {
-          height: this.height(),
-          width: this.width(),
-          islandSize: this.#landSize + this.#randomNumberGenerator() * 0.2,
-          landCoverage: this.#landCoverage,
-          maxIterations: this.#maxIterations,
-        },
-      });
+  async generateIslands(): Promise<void> {
+    const height = this.height(),
+      width = this.width(),
+      maxIslandPercentage =
+        this.#landSize + this.#randomNumberGenerator() * 0.2,
+      landCoverage = this.#landCoverage,
+      maxIterations = this.#maxIterations,
+      maxIslandSize = Math.ceil(((height * width) / 100) * maxIslandPercentage),
+      map: number[] = new Array(height * width).fill(0);
 
-      worker.on('error', (error) => reject(error));
-      worker.on('messageerror', (error) => reject(error));
-
-      worker.on('message', (mapData: number[]) => {
-        this.#map = mapData.map((value) => {
-          if (value === 1) {
-            return new Land();
+    while (
+      map.length === 0 ||
+      map.filter((value: number): boolean => value === 1).length / map.length <
+        landCoverage
+    ) {
+      const seen: { [key: number]: number } = {},
+        currentIsland: number[] = [],
+        toProcess: number[] = [],
+        seedTile: number = Math.floor(height * width * Math.random()),
+        flagAsSeen: (id: number) => void = (id: number): void => {
+          if (!(id in seen)) {
+            seen[id] = 0;
           }
 
-          return new Water();
-        });
+          seen[id]++;
+        };
 
-        resolve();
-      });
+      map[seedTile] = 1;
+      currentIsland.push(seedTile);
+
+      flagAsSeen(seedTile);
+
+      toProcess.push(...getNeighbours(height, width, seedTile));
+
+      while (toProcess.length) {
+        const currentTile = toProcess.shift() as number;
+        // ,
+        //   distance = distanceFrom(height, width, seedTile, currentTile),
+        //   surroundingLand = getNeighbours(height, width, currentTile, false).filter(
+        //     (n: number): boolean => map[n] === 1
+        //   );
+
+        if ((seen[currentTile] || 0) <= maxIterations) {
+          if (
+            Math.random() > 0.3
+            // maxIslandPercentage >= Math.sqrt(distance) * Math.random() ||
+            // surroundingLand.length * Math.random() > 3
+          ) {
+            map[currentTile] = 1;
+            currentIsland.push(currentTile);
+
+            getNeighbours(height, width, currentTile)
+              .filter((tile) => toProcess.indexOf(tile) === -1)
+              .forEach((tile) => toProcess.push(tile));
+          } else {
+            getNeighbours(height, width, currentTile).forEach((tile) => {
+              const index = toProcess.indexOf(tile);
+
+              if (index > -1) {
+                toProcess.splice(index, 1);
+              }
+            });
+          }
+
+          flagAsSeen(currentTile);
+        }
+
+        if (
+          currentIsland.length > maxIslandSize ||
+          map.filter((value: number): boolean => value === 1).length /
+            map.length >=
+            landCoverage
+        ) {
+          break;
+        }
+      }
+
+      if (
+        map.filter((value: number): boolean => value === 1).length /
+          map.length >=
+        landCoverage
+      ) {
+        break;
+      }
+    }
+
+    this.#map = map.map((value) => {
+      if (value === 1) {
+        return new Land();
+      }
+
+      return new Water();
     });
   }
 
