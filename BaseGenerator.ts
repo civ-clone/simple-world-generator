@@ -187,7 +187,7 @@ export class BaseGenerator extends Generator implements IGenerator {
       this.#ruleRegistry
         .get(DistributionGroups)
         .filter((rule: DistributionGroups): boolean => rule.validate())
-        .map((rule: DistributionGroups): typeof Terrain[] => {
+        .map((rule: DistributionGroups): (typeof Terrain)[] => {
           const result = rule.process();
 
           if (!result) {
@@ -196,7 +196,7 @@ export class BaseGenerator extends Generator implements IGenerator {
 
           return result;
         })
-        .forEach((group: typeof Terrain[]): void =>
+        .forEach((group: (typeof Terrain)[]): void =>
           group.forEach((TerrainType: typeof Terrain): void =>
             rules
               .filter((rule: Distribution): boolean =>

@@ -11,7 +11,7 @@ import {
   River,
   Swamp,
   Tundra,
-} from '@civ-clone/civ1-world/Terrains';
+} from '@civ-clone/library-world/Terrains';
 import {
   Coal,
   Fish,
@@ -23,7 +23,7 @@ import {
   Oil,
   Seal,
   Shield,
-} from '@civ-clone/civ1-world/TerrainFeatures';
+} from '@civ-clone/library-world/TerrainFeatures';
 import {
   RuleRegistry,
   instance as ruleRegistryInstance,

@@ -5,7 +5,7 @@ import {
 import { RuleRegistry } from '@civ-clone/core-rule/RuleRegistry';
 import { TerrainRegistry } from '@civ-clone/core-terrain/TerrainRegistry';
 import Terrain from '@civ-clone/core-terrain/Terrain';
-export declare type IOptions = {
+export type IOptions = {
   landCoverage?: number;
   landSize?: number;
   maxIterations?: number;

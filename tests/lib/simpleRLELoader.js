@@ -1,8 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.simpleRLELoader = void 0;
-const Terrains_1 = require("@civ-clone/civ1-world/Terrains");
-const TerrainFeatures_1 = require("@civ-clone/civ1-world/TerrainFeatures");
+const Terrains_1 = require("@civ-clone/library-world/Terrains");
+const TerrainFeatures_1 = require("@civ-clone/library-world/TerrainFeatures");
 const RuleRegistry_1 = require("@civ-clone/core-rule/RuleRegistry");
 const TerrainFeatureRegistry_1 = require("@civ-clone/core-terrain-feature/TerrainFeatureRegistry");
 const Loader_1 = require("./Loader");

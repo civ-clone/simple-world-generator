@@ -8,7 +8,7 @@ export declare class StaticWorldGenerator extends Generator {
   generate(): Promise<Terrain[]>;
   getTerrainWithFeature(
     TerrainType: typeof Terrain,
-    ...features: typeof TerrainFeature[]
+    ...features: (typeof TerrainFeature)[]
   ): Terrain;
 }
 export default StaticWorldGenerator;

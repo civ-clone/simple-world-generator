@@ -11,7 +11,7 @@ import {
   River,
   Swamp,
   Tundra,
-} from '@civ-clone/civ1-world/Terrains';
+} from '@civ-clone/library-world/Terrains';
 import {
   Coal,
   Fish,
@@ -23,7 +23,7 @@ import {
   Oil,
   Seal,
   Shield,
-} from '@civ-clone/civ1-world/TerrainFeatures';
+} from '@civ-clone/library-world/TerrainFeatures';
 import Generator from '@civ-clone/core-world-generator/Generator';
 import Terrain from '@civ-clone/core-terrain/Terrain';
 import TerrainFeature from '@civ-clone/core-terrain-feature/TerrainFeature';
@@ -44,7 +44,7 @@ export class StaticWorldGenerator extends Generator {
   }
 
   generate(): Promise<Terrain[]> {
-    const terrains: [typeof Terrain, ...typeof TerrainFeature[]][] = [
+    const terrains: [typeof Terrain, ...(typeof TerrainFeature)[]][] = [
       [Arctic],
       [Arctic, Seal],
       [Desert],
@@ -76,7 +76,7 @@ export class StaticWorldGenerator extends Generator {
         terrains.map(
           ([TerrainType, ...features]: [
             typeof Terrain,
-            ...typeof TerrainFeature[]
+            ...(typeof TerrainFeature)[]
           ]): Terrain => this.getTerrainWithFeature(TerrainType, ...features)
         )
       );
@@ -85,7 +85,7 @@ export class StaticWorldGenerator extends Generator {
 
   getTerrainWithFeature(
     TerrainType: typeof Terrain,
-    ...features: typeof TerrainFeature[]
+    ...features: (typeof TerrainFeature)[]
   ): Terrain {
     const terrain = new TerrainType();
 

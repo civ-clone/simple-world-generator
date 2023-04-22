@@ -13,8 +13,8 @@ var __classPrivateFieldGet = (this && this.__classPrivateFieldGet) || function (
 var _StaticWorldGenerator_terrainFeatureRegistry;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.StaticWorldGenerator = void 0;
-const Terrains_1 = require("@civ-clone/civ1-world/Terrains");
-const TerrainFeatures_1 = require("@civ-clone/civ1-world/TerrainFeatures");
+const Terrains_1 = require("@civ-clone/library-world/Terrains");
+const TerrainFeatures_1 = require("@civ-clone/library-world/TerrainFeatures");
 const Generator_1 = require("@civ-clone/core-world-generator/Generator");
 const TerrainFeatureRegistry_1 = require("@civ-clone/core-terrain-feature/TerrainFeatureRegistry");
 class StaticWorldGenerator extends Generator_1.default {
