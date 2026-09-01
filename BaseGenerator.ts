@@ -29,16 +29,16 @@ export type IOptions = {
 };
 
 export class BaseGenerator extends Generator implements IGenerator {
-  #landCoverage: number; // % of surface covered with land
-  #landSize: number; // average "size" of landmass
-  #maxIterations: number; // number of times a tile can be tested to change to land
-  #clusterChance: number; // chance for adjacent tiles to cluster
-  #coverage: number; // default total coverage of terrain type
-  #pathChance: number; // default chance for directly adjacent tiles to be part of the path
-  #map: Terrain[];
-  #randomNumberGenerator: () => number;
-  #ruleRegistry: RuleRegistry;
-  #terrainRegistry: TerrainRegistry;
+  private _landCoverage: number; // % of surface covered with land
+  private _landSize: number; // average "size" of landmass
+  private _maxIterations: number; // number of times a tile can be tested to change to land
+  private _clusterChance: number; // chance for adjacent tiles to cluster
+  private _coverage: number; // default total coverage of terrain type
+  private _pathChance: number; // default chance for directly adjacent tiles to be part of the path
+  private _map: Terrain[];
+  private _randomNumberGenerator: () => number;
+  private _ruleRegistry: RuleRegistry;
+  private _terrainRegistry: TerrainRegistry;
 
   constructor(
     height: number = 100,
@@ -59,17 +59,17 @@ export class BaseGenerator extends Generator implements IGenerator {
       pathChance = 0.05, // default chance for directly adjacent tiles to be part of the path
     } = options;
 
-    this.#landCoverage = landCoverage; // % of surface covered with land
-    this.#landSize = landSize; // average "size" of landmass
-    this.#maxIterations = maxIterations; // number of times a tile can be tested to change to land
-    this.#clusterChance = clusterChance; // chance for adjacent tiles to cluster
-    this.#coverage = coverage; // default total coverage of terrain type
-    this.#pathChance = pathChance; // default chance for directly adjacent tiles to be part of the path
-    this.#ruleRegistry = ruleRegistry;
-    this.#terrainRegistry = terrainRegistry;
-    this.#randomNumberGenerator = randomNumberGenerator;
+    this._landCoverage = landCoverage; // % of surface covered with land
+    this._landSize = landSize; // average "size" of landmass
+    this._maxIterations = maxIterations; // number of times a tile can be tested to change to land
+    this._clusterChance = clusterChance; // chance for adjacent tiles to cluster
+    this._coverage = coverage; // default total coverage of terrain type
+    this._pathChance = pathChance; // default chance for directly adjacent tiles to be part of the path
+    this._ruleRegistry = ruleRegistry;
+    this._terrainRegistry = terrainRegistry;
+    this._randomNumberGenerator = randomNumberGenerator;
 
-    this.#map = new Array(this.height() * this.width())
+    this._map = new Array(this.height() * this.width())
       .fill(0)
       .map(() => new Water());
   }
@@ -78,9 +78,9 @@ export class BaseGenerator extends Generator implements IGenerator {
     const height = this.height(),
       width = this.width(),
       maxIslandPercentage =
-        this.#landSize + this.#randomNumberGenerator() * 0.2,
-      landCoverage = this.#landCoverage,
-      maxIterations = this.#maxIterations,
+        this._landSize + this._randomNumberGenerator() * 0.2,
+      landCoverage = this._landCoverage,
+      maxIterations = this._maxIterations,
       maxIslandSize = Math.ceil(((height * width) / 100) * maxIslandPercentage),
       map: number[] = new Array(height * width).fill(0);
 
@@ -160,7 +160,7 @@ export class BaseGenerator extends Generator implements IGenerator {
       }
     }
 
-    this.#map = map.map((value) => {
+    this._map = map.map((value) => {
       if (value === 1) {
         return new Land();
       }
@@ -172,7 +172,7 @@ export class BaseGenerator extends Generator implements IGenerator {
   generate(): Promise<Terrain[]> {
     return this.generateIslands().then(
       (): Promise<Terrain[]> =>
-        this.populateTerrain().then((): Terrain[] => this.#map)
+        this.populateTerrain().then((): Terrain[] => this._map)
     );
   }
 
@@ -182,9 +182,9 @@ export class BaseGenerator extends Generator implements IGenerator {
 
   populateTerrain(): Promise<void> {
     return new Promise<void>((resolve) => {
-      const rules = this.#ruleRegistry.get(Distribution);
+      const rules = this._ruleRegistry.get(Distribution);
 
-      this.#ruleRegistry
+      this._ruleRegistry
         .get(DistributionGroups)
         .filter((rule: DistributionGroups): boolean => rule.validate())
         .map((rule: DistributionGroups): (typeof Terrain)[] => {
@@ -200,10 +200,10 @@ export class BaseGenerator extends Generator implements IGenerator {
           group.forEach((TerrainType: typeof Terrain): void =>
             rules
               .filter((rule: Distribution): boolean =>
-                rule.validate(TerrainType, this.#map)
+                rule.validate(TerrainType, this._map)
               )
               .map((rule: Distribution): IDistribution[] => {
-                const result = rule.process(TerrainType, this.#map);
+                const result = rule.process(TerrainType, this._map);
 
                 if (!result) {
                   throw new TypeError('Unexpected data from Distribution.');
@@ -215,20 +215,20 @@ export class BaseGenerator extends Generator implements IGenerator {
                 distribution.forEach(
                   ({
                     cluster = false,
-                    clusterChance = this.#clusterChance,
-                    coverage = this.#coverage,
+                    clusterChance = this._clusterChance,
+                    coverage = this._coverage,
                     fill = false,
                     from = 0,
                     path = false,
-                    pathChance = this.#pathChance,
+                    pathChance = this._pathChance,
                     to = 1,
                   }) => {
-                    const validIndices = Object.keys(this.#map)
+                    const validIndices = Object.keys(this._map)
                       .map((index: string): number => parseInt(index, 10))
                       .filter(
                         (index: number): boolean =>
                           // @ts-ignore
-                          this.#map[index] instanceof TerrainType.__proto__
+                          this._map[index] instanceof TerrainType.__proto__
                       )
                       .filter(
                         (index: number): boolean =>
@@ -238,7 +238,7 @@ export class BaseGenerator extends Generator implements IGenerator {
 
                     if (fill) {
                       validIndices.forEach((index: number): void => {
-                        this.#map[index] = new TerrainType();
+                        this._map[index] = new TerrainType();
                       });
 
                       return;
@@ -250,39 +250,39 @@ export class BaseGenerator extends Generator implements IGenerator {
                       const currentIndex: number =
                         validIndices[
                           Math.floor(
-                            this.#randomNumberGenerator() * validIndices.length
+                            this._randomNumberGenerator() * validIndices.length
                           )
                         ];
 
-                      this.#map[currentIndex] = new TerrainType();
+                      this._map[currentIndex] = new TerrainType();
                       max--;
 
                       if (cluster) {
                         const clusteredNeighbours: number[] =
                           this.getNeighbours(currentIndex).filter(
                             (index: number): boolean =>
-                              !(this.#map[index] instanceof TerrainType)
+                              !(this._map[index] instanceof TerrainType)
                           );
                         while (clusteredNeighbours.length && max > 0) {
                           const index = clusteredNeighbours.shift() as number;
 
                           if (
                             clusterChance >=
-                            this.#randomNumberGenerator() /
+                            this._randomNumberGenerator() /
                               this.distanceFrom(currentIndex, index)
                           ) {
-                            this.#map[index] = new TerrainType();
+                            this._map[index] = new TerrainType();
                             max--;
 
                             clusteredNeighbours.push(
                               ...this.getNeighbours(index)
                                 .filter(
                                   (index: number): boolean =>
-                                    !(this.#map[index] instanceof TerrainType)
+                                    !(this._map[index] instanceof TerrainType)
                                 )
                                 .filter(
                                   (index: number): boolean =>
-                                    this.#map[index] instanceof
+                                    this._map[index] instanceof
                                     // @ts-ignore
                                     TerrainType.__proto__
                                 )
@@ -298,25 +298,25 @@ export class BaseGenerator extends Generator implements IGenerator {
                       if (path) {
                         let index = currentIndex;
 
-                        while (pathChance >= this.#randomNumberGenerator()) {
+                        while (pathChance >= this._randomNumberGenerator()) {
                           const candidates: number[] = this.getNeighbours(
                             index
                           ).filter(
                             (index: number): boolean =>
-                              this.#map[index] instanceof
+                              this._map[index] instanceof
                                 // @ts-ignore
                                 TerrainType.__proto__ &&
-                              !(this.#map[index] instanceof TerrainType)
+                              !(this._map[index] instanceof TerrainType)
                           );
                           index =
                             candidates[
                               Math.floor(
-                                this.#randomNumberGenerator() *
+                                this._randomNumberGenerator() *
                                   candidates.length
                               )
                             ];
 
-                          this.#map[index] = new TerrainType();
+                          this._map[index] = new TerrainType();
                           max--;
                         }
                       }

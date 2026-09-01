@@ -14,7 +14,16 @@ export type IOptions = {
   pathChance?: number;
 };
 export declare class BaseGenerator extends Generator implements IGenerator {
-  #private;
+  private _landCoverage;
+  private _landSize;
+  private _maxIterations;
+  private _clusterChance;
+  private _coverage;
+  private _pathChance;
+  private _map;
+  private _randomNumberGenerator;
+  private _ruleRegistry;
+  private _terrainRegistry;
   constructor(
     height?: number,
     width?: number,
