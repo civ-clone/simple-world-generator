@@ -8,8 +8,9 @@ const RuleRegistry_1 = require("@civ-clone/core-rule/RuleRegistry");
 const TerrainRegistry_1 = require("@civ-clone/core-terrain/TerrainRegistry");
 const DistributionGroups_1 = require("@civ-clone/core-world-generator/Rules/DistributionGroups");
 const getNeighbours_1 = require("@civ-clone/core-world-generator/lib/getNeighbours");
+const core_random_1 = require("@civ-clone/core-random");
 class BaseGenerator extends Generator_1.Generator {
-    constructor(height = 100, width = 160, options = {}, ruleRegistry = RuleRegistry_1.instance, terrainRegistry = TerrainRegistry_1.instance, randomNumberGenerator = () => Math.random()) {
+    constructor(height = 100, width = 160, options = {}, ruleRegistry = RuleRegistry_1.instance, terrainRegistry = TerrainRegistry_1.instance, randomNumberGenerator = core_random_1.instance) {
         super(height, width);
         const { landCoverage = 0.4, // % of surface covered with land
         landSize = 0.2, // average "size" of landmass
@@ -36,7 +37,7 @@ class BaseGenerator extends Generator_1.Generator {
         while (map.length === 0 ||
             map.filter((value) => value === 1).length / map.length <
                 landCoverage) {
-            const seen = {}, currentIsland = [], toProcess = [], seedTile = Math.floor(height * width * Math.random()), flagAsSeen = (id) => {
+            const seen = {}, currentIsland = [], toProcess = [], seedTile = Math.floor(height * width * this._randomNumberGenerator()), flagAsSeen = (id) => {
                 if (!(id in seen)) {
                     seen[id] = 0;
                 }
@@ -54,9 +55,9 @@ class BaseGenerator extends Generator_1.Generator {
                 //     (n: number): boolean => map[n] === 1
                 //   );
                 if ((seen[currentTile] || 0) <= maxIterations) {
-                    if (Math.random() > 0.3
-                    // maxIslandPercentage >= Math.sqrt(distance) * Math.random() ||
-                    // surroundingLand.length * Math.random() > 3
+                    if (this._randomNumberGenerator() > 0.3
+                    // maxIslandPercentage >= Math.sqrt(distance) * this._randomNumberGenerator() ||
+                    // surroundingLand.length * this._randomNumberGenerator() > 3
                     ) {
                         map[currentTile] = 1;
                         currentIsland.push(currentTile);

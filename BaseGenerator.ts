@@ -18,6 +18,7 @@ import {
 import DistributionGroups from '@civ-clone/core-world-generator/Rules/DistributionGroups';
 import Terrain from '@civ-clone/core-terrain/Terrain';
 import getNeighbours from '@civ-clone/core-world-generator/lib/getNeighbours';
+import { instance as rngInstance } from '@civ-clone/core-random';
 
 export type IOptions = {
   landCoverage?: number; // % of surface covered with land
@@ -46,7 +47,7 @@ export class BaseGenerator extends Generator implements IGenerator {
     options: IOptions = {},
     ruleRegistry: RuleRegistry = ruleRegistryInstance,
     terrainRegistry: TerrainRegistry = terrainRegistryInstance,
-    randomNumberGenerator: () => number = () => Math.random()
+    randomNumberGenerator: () => number = rngInstance
   ) {
     super(height, width);
 
@@ -92,7 +93,9 @@ export class BaseGenerator extends Generator implements IGenerator {
       const seen: { [key: number]: number } = {},
         currentIsland: number[] = [],
         toProcess: number[] = [],
-        seedTile: number = Math.floor(height * width * Math.random()),
+        seedTile: number = Math.floor(
+          height * width * this._randomNumberGenerator()
+        ),
         flagAsSeen: (id: number) => void = (id: number): void => {
           if (!(id in seen)) {
             seen[id] = 0;
@@ -118,9 +121,9 @@ export class BaseGenerator extends Generator implements IGenerator {
 
         if ((seen[currentTile] || 0) <= maxIterations) {
           if (
-            Math.random() > 0.3
-            // maxIslandPercentage >= Math.sqrt(distance) * Math.random() ||
-            // surroundingLand.length * Math.random() > 3
+            this._randomNumberGenerator() > 0.3
+            // maxIslandPercentage >= Math.sqrt(distance) * this._randomNumberGenerator() ||
+            // surroundingLand.length * this._randomNumberGenerator() > 3
           ) {
             map[currentTile] = 1;
             currentIsland.push(currentTile);
