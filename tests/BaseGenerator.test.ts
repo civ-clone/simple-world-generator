@@ -133,6 +133,52 @@ describe('BaseGenerator', () => {
     });
   });
 
+  it('should lay out a square grid by default', () => {
+    const topology = new Generator(6, 8).topology();
+
+    expect(topology.id()).to.equal('square');
+    expect(topology.neighbour(7, 5, 's')).to.deep.equal([7, 0]);
+  });
+
+  it('should lay out the grid its topologyId option names, and still read its other options', async () => {
+    const options = {
+        landCoverage: 0.5,
+        landSize: 0.3,
+        maxIterations: 5,
+        clusterChance: 0.1,
+        coverage: 0.2,
+        pathChance: 0.15,
+      },
+      hex = new Generator(
+        6,
+        8,
+        { topologyId: 'hex-odd-r', ...options },
+        rules(),
+        new TerrainRegistry(),
+        createRng(1)
+      ),
+      topology = hex.topology();
+
+    expect(hex.height()).to.equal(6);
+    expect(hex.width()).to.equal(8);
+    expect(topology.id()).to.equal('hex-odd-r');
+    // 8 wide: east of the last column is the first.
+    expect(topology.neighbour(7, 0, 'e')).to.deep.equal([0, 0]);
+    // 6 tall: south of the last row is the first.
+    expect(topology.neighbour(0, 5, 'se')![1]).to.equal(0);
+    expect(hex.getNeighbours(0)).to.have.length(6);
+
+    expect(hex.options()).to.deep.equal({
+      topologyId: 'hex-odd-r',
+      ...options,
+    });
+    Object.entries(options).forEach(([key, value]) =>
+      expect((hex as any)[`_${key}`]).to.equal(value)
+    );
+
+    expect(await hex.generate()).to.have.length(48);
+  });
+
   it('should find neighbours through its topology', async () => {
     const topologies: ITopology[] = [];
 

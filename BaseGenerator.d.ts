@@ -12,6 +12,7 @@ export type IOptions = {
   clusterChance?: number;
   coverage?: number;
   pathChance?: number;
+  topologyId?: string;
 };
 export declare class BaseGenerator extends Generator implements IGenerator {
   private _landCoverage;
