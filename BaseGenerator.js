@@ -7,7 +7,6 @@ const Types_1 = require("@civ-clone/core-terrain/Types");
 const RuleRegistry_1 = require("@civ-clone/core-rule/RuleRegistry");
 const TerrainRegistry_1 = require("@civ-clone/core-terrain/TerrainRegistry");
 const DistributionGroups_1 = require("@civ-clone/core-world-generator/Rules/DistributionGroups");
-const getNeighbours_1 = require("@civ-clone/core-world-generator/lib/getNeighbours");
 const core_random_1 = require("@civ-clone/core-random");
 class BaseGenerator extends Generator_1.Generator {
     constructor(height = 100, width = 160, options = {}, ruleRegistry = RuleRegistry_1.instance, terrainRegistry = TerrainRegistry_1.instance, randomNumberGenerator = core_random_1.instance) {
@@ -46,12 +45,12 @@ class BaseGenerator extends Generator_1.Generator {
             map[seedTile] = 1;
             currentIsland.push(seedTile);
             flagAsSeen(seedTile);
-            toProcess.push(...(0, getNeighbours_1.default)(height, width, seedTile));
+            toProcess.push(...this.getNeighbours(seedTile));
             while (toProcess.length) {
                 const currentTile = toProcess.shift();
                 // ,
-                //   distance = distanceFrom(height, width, seedTile, currentTile),
-                //   surroundingLand = getNeighbours(height, width, currentTile, false).filter(
+                //   distance = this.distanceFrom(seedTile, currentTile),
+                //   surroundingLand = this.getNeighbours(currentTile, false).filter(
                 //     (n: number): boolean => map[n] === 1
                 //   );
                 if ((seen[currentTile] || 0) <= maxIterations) {
@@ -61,12 +60,12 @@ class BaseGenerator extends Generator_1.Generator {
                     ) {
                         map[currentTile] = 1;
                         currentIsland.push(currentTile);
-                        (0, getNeighbours_1.default)(height, width, currentTile)
+                        this.getNeighbours(currentTile)
                             .filter((tile) => toProcess.indexOf(tile) === -1)
                             .forEach((tile) => toProcess.push(tile));
                     }
                     else {
-                        (0, getNeighbours_1.default)(height, width, currentTile).forEach((tile) => {
+                        this.getNeighbours(currentTile).forEach((tile) => {
                             const index = toProcess.indexOf(tile);
                             if (index > -1) {
                                 toProcess.splice(index, 1);
@@ -97,9 +96,6 @@ class BaseGenerator extends Generator_1.Generator {
     }
     generate() {
         return this.generateIslands().then(() => this.populateTerrain().then(() => this._map));
-    }
-    getNeighbours(index, directNeighbours = true) {
-        return (0, getNeighbours_1.default)(this.height(), this.width(), index, directNeighbours);
     }
     populateTerrain() {
         return new Promise((resolve) => {
