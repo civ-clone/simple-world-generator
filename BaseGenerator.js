@@ -10,7 +10,8 @@ const DistributionGroups_1 = require("@civ-clone/core-world-generator/Rules/Dist
 const core_random_1 = require("@civ-clone/core-random");
 class BaseGenerator extends Generator_1.Generator {
     constructor(height = 100, width = 160, options = {}, ruleRegistry = RuleRegistry_1.instance, terrainRegistry = TerrainRegistry_1.instance, randomNumberGenerator = core_random_1.instance) {
-        super(height, width);
+        // `Generator` builds the grid from the `topologyId` option.
+        super(height, width, options);
         const { landCoverage = 0.4, // % of surface covered with land
         landSize = 0.2, // average "size" of landmass
         maxIterations = 10, // number of times a tile can be tested to change to land

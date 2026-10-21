@@ -26,6 +26,7 @@ export type IOptions = {
   clusterChance?: number; // chance for adjacent tiles to cluster
   coverage?: number; // default total coverage of terrain type
   pathChance?: number; // default chance for directly adjacent tiles to be part of the path
+  topologyId?: string; // the grid's shape, as `Generator`'s `topologyId` option ('square' by default)
 };
 
 export class BaseGenerator extends Generator implements IGenerator {
@@ -48,7 +49,8 @@ export class BaseGenerator extends Generator implements IGenerator {
     terrainRegistry: TerrainRegistry = terrainRegistryInstance,
     randomNumberGenerator: () => number = rngInstance
   ) {
-    super(height, width);
+    // `Generator` builds the grid from the `topologyId` option.
+    super(height, width, options);
 
     const {
       landCoverage = 0.4, // % of surface covered with land
