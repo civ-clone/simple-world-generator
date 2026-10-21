@@ -34,7 +34,6 @@ export declare class BaseGenerator extends Generator implements IGenerator {
   );
   generateIslands(): Promise<void>;
   generate(): Promise<Terrain[]>;
-  getNeighbours(index: number, directNeighbours?: boolean): number[];
   populateTerrain(): Promise<void>;
 }
 export default BaseGenerator;

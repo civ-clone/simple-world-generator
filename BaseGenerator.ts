@@ -17,7 +17,6 @@ import {
 } from '@civ-clone/core-terrain/TerrainRegistry';
 import DistributionGroups from '@civ-clone/core-world-generator/Rules/DistributionGroups';
 import Terrain from '@civ-clone/core-terrain/Terrain';
-import getNeighbours from '@civ-clone/core-world-generator/lib/getNeighbours';
 import { instance as rngInstance } from '@civ-clone/core-random';
 
 export type IOptions = {
@@ -109,13 +108,13 @@ export class BaseGenerator extends Generator implements IGenerator {
 
       flagAsSeen(seedTile);
 
-      toProcess.push(...getNeighbours(height, width, seedTile));
+      toProcess.push(...this.getNeighbours(seedTile));
 
       while (toProcess.length) {
         const currentTile = toProcess.shift() as number;
         // ,
-        //   distance = distanceFrom(height, width, seedTile, currentTile),
-        //   surroundingLand = getNeighbours(height, width, currentTile, false).filter(
+        //   distance = this.distanceFrom(seedTile, currentTile),
+        //   surroundingLand = this.getNeighbours(currentTile, false).filter(
         //     (n: number): boolean => map[n] === 1
         //   );
 
@@ -128,11 +127,11 @@ export class BaseGenerator extends Generator implements IGenerator {
             map[currentTile] = 1;
             currentIsland.push(currentTile);
 
-            getNeighbours(height, width, currentTile)
+            this.getNeighbours(currentTile)
               .filter((tile) => toProcess.indexOf(tile) === -1)
               .forEach((tile) => toProcess.push(tile));
           } else {
-            getNeighbours(height, width, currentTile).forEach((tile) => {
+            this.getNeighbours(currentTile).forEach((tile) => {
               const index = toProcess.indexOf(tile);
 
               if (index > -1) {
@@ -177,10 +176,6 @@ export class BaseGenerator extends Generator implements IGenerator {
       (): Promise<Terrain[]> =>
         this.populateTerrain().then((): Terrain[] => this._map)
     );
-  }
-
-  getNeighbours(index: number, directNeighbours: boolean = true): number[] {
-    return getNeighbours(this.height(), this.width(), index, directNeighbours);
   }
 
   populateTerrain(): Promise<void> {

@@ -19,7 +19,7 @@
   },
   "devDependencies": {
     "@civ-clone/core-terrain-feature": "^0.1.0",
-    "@civ-clone/core-world": "^0.1.0",
+    "@civ-clone/core-world": "^0.1.19",
     "@types/chai": "^4.0.0",
     "@types/mocha": "^10.0.0",
     "@types/node": "^14.0.0",
@@ -34,7 +34,7 @@
     "@civ-clone/core-random": "^0.1.0",
     "@civ-clone/core-rule": "^0.1.0",
     "@civ-clone/core-terrain": "^0.1.0",
-    "@civ-clone/core-world-generator": "^0.1.0",
+    "@civ-clone/core-world-generator": "^0.1.6",
     "@civ-clone/library-world": "^0.1.0"
   }
 }
